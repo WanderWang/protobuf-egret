@@ -1,0 +1,22 @@
+{
+  "name": "@egret/protobuf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "pb-egret": "out/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra-promise": "^1.0.1",
+    "uglify-js": "^3.3.7"
+  },
+  "devDependencies": {
+    "@types/fs-extra-promise": "^1.0.4",
+    "@types/uglify-js": "^2.6.30"
+  }
+}
