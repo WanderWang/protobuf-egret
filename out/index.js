@@ -39,6 +39,7 @@ var child_process = require("child_process");
 var fs = require("fs-extra-promise");
 var path = require("path");
 var UglifyJS = require("uglify-js");
+var os = require("os");
 var root = path.resolve(__filename, '../../');
 function shell(command, args) {
     return new Promise(function (resolve, reject) {
@@ -56,37 +57,50 @@ function shell(command, args) {
 }
 function generate(egretProjectPath) {
     return __awaiter(this, void 0, void 0, function () {
-        var output, dirname, protoRoot, fileList, protoList, pbjsResult, minjs, pbtsResult;
+        var tempfile, output, dirname, protoRoot, fileList, protoList, pbjsResult, minjs, pbtsResult;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    tempfile = path.join(os.tmpdir(), 'pbegret', 'temp.js');
+                    return [4 /*yield*/, fs.mkdirpAsync(path.dirname(tempfile))];
+                case 1:
+                    _a.sent();
                     output = path.join(egretProjectPath, '/protobuf/bundles/protobuf-bundles.js');
                     dirname = path.dirname(output);
                     return [4 /*yield*/, fs.mkdirpAsync(dirname)];
-                case 1:
+                case 2:
                     _a.sent();
                     protoRoot = path.join(egretProjectPath, 'protobuf/protofile');
                     return [4 /*yield*/, fs.readdirAsync(protoRoot)];
-                case 2:
+                case 3:
                     fileList = _a.sent();
                     protoList = fileList.filter(function (item) { return path.extname(item) === '.proto'; });
-                    return [4 /*yield*/, shell('pbjs', ['-t', 'static', '-p', protoRoot, protoList.join(" ")])];
-                case 3:
+                    return [4 /*yield*/, shell('pbjs', ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile])];
+                case 4:
+                    _a.sent();
+                    return [4 /*yield*/, fs.readFileAsync(tempfile, 'utf-8')];
+                case 5:
                     pbjsResult = _a.sent();
                     pbjsResult = 'var $protobuf = window.protobuf;\n$protobuf.roots.default=window;\n' + pbjsResult;
                     return [4 /*yield*/, fs.writeFileAsync(output, pbjsResult, 'utf-8')];
-                case 4:
+                case 6:
                     _a.sent();
                     minjs = UglifyJS.minify(pbjsResult);
                     return [4 /*yield*/, fs.writeFileAsync(output.replace('.js', '.min.js'), minjs.code, 'utf-8')];
-                case 5:
+                case 7:
                     _a.sent();
-                    return [4 /*yield*/, shell('pbts', ['--main', output])];
-                case 6:
+                    return [4 /*yield*/, shell('pbts', ['--main', output, '-o', tempfile])];
+                case 8:
+                    _a.sent();
+                    return [4 /*yield*/, fs.readFileAsync(tempfile, 'utf-8')];
+                case 9:
                     pbtsResult = _a.sent();
                     pbtsResult = pbtsResult.replace(/\$protobuf/gi, "protobuf").replace(/export namespace/gi, 'declare namespace');
                     return [4 /*yield*/, fs.writeFileAsync(output.replace(".js", ".d.ts"), pbtsResult, 'utf-8')];
-                case 7:
+                case 10:
+                    _a.sent();
+                    return [4 /*yield*/, fs.removeAsync(tempfile)];
+                case 11:
                     _a.sent();
                     return [2 /*return*/];
             }

@@ -2,6 +2,7 @@ import * as child_process from 'child_process';
 import * as fs from 'fs-extra-promise';
 import * as path from 'path';
 import * as UglifyJS from 'uglify-js';
+import * as os from 'os';
 
 const root = path.resolve(__filename, '../../');
 
@@ -24,21 +25,25 @@ function shell(command: string, args: string[]) {
 
 
 async function generate(egretProjectPath: string) {
-
+    const tempfile = path.join(os.tmpdir(), 'pbegret', 'temp.js');
+    await fs.mkdirpAsync(path.dirname(tempfile));
     const output = path.join(egretProjectPath, '/protobuf/bundles/protobuf-bundles.js');
     const dirname = path.dirname(output);
     await fs.mkdirpAsync(dirname);
     const protoRoot = path.join(egretProjectPath, 'protobuf/protofile');
     const fileList = await fs.readdirAsync(protoRoot);
     const protoList = fileList.filter(item => path.extname(item) === '.proto')
-    let pbjsResult = await shell('pbjs', ['-t', 'static', '-p', protoRoot, protoList.join(" ")]);
+    await shell('pbjs', ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile]);
+    let pbjsResult = await fs.readFileAsync(tempfile, 'utf-8');
     pbjsResult = 'var $protobuf = window.protobuf;\n$protobuf.roots.default=window;\n' + pbjsResult;
     await fs.writeFileAsync(output, pbjsResult, 'utf-8');
     const minjs = UglifyJS.minify(pbjsResult);
     await fs.writeFileAsync(output.replace('.js', '.min.js'), minjs.code, 'utf-8');
-    let pbtsResult = await shell('pbts', ['--main', output]);
+    await shell('pbts', ['--main', output, '-o', tempfile]);
+    let pbtsResult = await fs.readFileAsync(tempfile, 'utf-8');
     pbtsResult = pbtsResult.replace(/\$protobuf/gi, "protobuf").replace(/export namespace/gi, 'declare namespace');
     await fs.writeFileAsync(output.replace(".js", ".d.ts"), pbtsResult, 'utf-8');
+    await fs.removeAsync(tempfile);
 
 }
 
