@@ -12,11 +12,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fs-extra": "^5.0.0",
     "fs-extra-promise": "^1.0.1",
     "uglify-js": "^3.3.7"
   },
   "devDependencies": {
     "@types/fs-extra-promise": "^1.0.4",
+    "@types/node": "^9.3.0",
     "@types/uglify-js": "^2.6.30"
   }
 }
