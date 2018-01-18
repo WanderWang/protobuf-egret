@@ -39,7 +39,7 @@ var child_process = require("child_process");
 var fs = require("fs-extra-promise");
 var path = require("path");
 var UglifyJS = require("uglify-js");
-var root = path.resolve(process.argv[1], '../../');
+var root = path.resolve(__filename, '../../');
 function shell(command, args) {
     return new Promise(function (resolve, reject) {
         var cmd = command + " " + args.join(" ");

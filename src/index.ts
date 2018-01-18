@@ -3,7 +3,7 @@ import * as fs from 'fs-extra-promise';
 import * as path from 'path';
 import * as UglifyJS from 'uglify-js';
 
-const root = path.resolve(process.argv[1], '../../');
+const root = path.resolve(__filename, '../../');
 
 function shell(command: string, args: string[]) {
     return new Promise<string>((resolve, reject) => {
