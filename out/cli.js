@@ -1,6 +1,9 @@
 #! /usr/bin/env node
 
 
-const command = process.argv[2];
-const egretProject = process.argv[3];
+var command = process.argv[2];
+var egretProject = process.argv[3];
+if (!egretProject) {
+    egretProject = '.';
+}
 require('./').run(command, egretProject);

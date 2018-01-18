@@ -103,22 +103,28 @@ function addToEgret(egretProjectRoot) {
                     return [4 /*yield*/, fs.copyAsync(path.join(root, 'dist'), path.join(egretProjectRoot, 'protobuf/library'))];
                 case 1:
                     _a.sent();
+                    return [4 /*yield*/, fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/protofile'))];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/bundles'))];
+                case 3:
+                    _a.sent();
                     console.log('正在将 protobuf 添加到 egretProperties.json 中...');
                     return [4 /*yield*/, fs.readJSONAsync(path.join(egretProjectRoot, 'egretProperties.json'))];
-                case 2:
+                case 4:
                     egretProperties = _a.sent();
                     egretProperties.modules.push({ name: 'protobuf-library', path: 'protobuf/library' });
                     egretProperties.modules.push({ name: 'protobuf-bundles', path: 'protobuf/bundles' });
                     return [4 /*yield*/, fs.writeFileAsync(path.join(egretProjectRoot, 'egretProperties.json'), JSON.stringify(egretProperties, null, '\t\t'))];
-                case 3:
+                case 5:
                     _a.sent();
                     console.log('正在将 protobuf 添加到 tsconfig.json 中...');
                     return [4 /*yield*/, fs.readJSONAsync(path.join(egretProjectRoot, 'tsconfig.json'))];
-                case 4:
+                case 6:
                     tsconfig = _a.sent();
                     tsconfig.include.push('protobuf/**/*.d.ts');
                     return [4 /*yield*/, fs.writeFileAsync(path.join(egretProjectRoot, 'tsconfig.json'), JSON.stringify(tsconfig, null, '\t\t'))];
-                case 5:
+                case 7:
                     _a.sent();
                     return [2 /*return*/];
             }

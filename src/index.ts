@@ -47,6 +47,8 @@ async function generate(egretProjectPath: string) {
 async function addToEgret(egretProjectRoot: string) {
     console.log('正在将 protobuf 源码拷贝至 egret 项目...');
     await fs.copyAsync(path.join(root, 'dist'), path.join(egretProjectRoot, 'protobuf/library'));
+    await fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/protofile'));
+    await fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/bundles'));
     console.log('正在将 protobuf 添加到 egretProperties.json 中...');
     const egretProperties = await fs.readJSONAsync(path.join(egretProjectRoot, 'egretProperties.json'));
     egretProperties.modules.push({ name: 'protobuf-library', path: 'protobuf/library' });
