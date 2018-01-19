@@ -2,19 +2,26 @@
 
 ## 特性
 
-封装了 protobufjs 库及命令行。使用 protobufjs 6.8.4 的运行时库，并提供生成 .d.ts 文件的机制，以方便 TypeScript 项目使用
+
+1. 提供 protobuf.js 基础运行时库
+2. 提供命令行脚本，将 protofile 生成 JavaScript 代码
+3. 生成正确的 .d.ts 代码，以方便 TypeScript 项目使用
+4. 一键配置白鹭引擎的配置文件，无需开发者手动修改配置即可在项目中直接集成
+5. 本项目虽然名为 egret protobuf ，但是理论上支持所有 HTML5 游戏引擎。欢迎使用 PIXI.js , Cocos2d-js , LayaAir 等其他引擎的开发者使用本库。
+
+## 原理
+
+封装了 protobufjs 库及命令行。使用 protobufjs 6.8.4 的运行时库。
 
 protobufjs 自身存在着 pbts 命令，虽然也可以生成 .d.ts 文件，但是在全局模式而非 ES6 module 的情况下存在一些错误，本项目致力于解决这个问题，使 protobufjs 可以在非 ES6 模块项目中（比如白鹭引擎）中也可以使用 protobufjs 
 
 protobufjs 提供了多种使用方式，由于微信小游戏禁止 eval , new Function 等动态代码形式，所以本项目只提供了生成代码的形式，不支持通过 ```protobuf.load('awesome.proto')``` 的方式（因为这种方式也无法在微信小游戏中运行）。
 
-本项目虽然名为 egret protobuf ，但是理论上支持所有 HTML5 游戏引擎。欢迎使用 PIXI.js , Cocos2d-js , LayaAir 等其他引擎的开发者使用本库。
-
 
 ## 如何安装
 
 ```
-npm install protobuf@6.8.4 -g
+npm install protobufjs@6.8.4 -g
 npm install @egret/protobuf -g
 ```
 
