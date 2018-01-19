@@ -45,7 +45,9 @@ pb-egret generate
 
 下载源代码，使用 ```egret run egret-project ```即可直接运行 demo 项目
 
+## 已知问题
 
+proto 文件中的每一个协议一定要从属于一个 package，否则.d.ts生成会出现错误导致 ts 文件无法正确的找到这些类
 
 
 ## 路线图
