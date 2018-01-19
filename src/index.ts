@@ -17,14 +17,17 @@ function shell(command: string, args: string[]) {
             else {
                 resolve(stdout)
             }
-
-            // console.log(stdout, stderr)
         })
     })
 }
 
 
 async function generate(egretProjectPath: string) {
+    const rootDir = path.join(egretProjectPath, 'protobuf');
+    if (!await (fs.existsAsync(rootDir))) {
+        console.error('当前目录不存在 protobuf 文件夹，请首先执行 pb-egret add 命令');
+        process.exit(1);
+    }
     const tempfile = path.join(os.tmpdir(), 'pbegret', 'temp.js');
     await fs.mkdirpAsync(path.dirname(tempfile));
     const output = path.join(egretProjectPath, '/protobuf/bundles/protobuf-bundles.js');
@@ -50,20 +53,29 @@ async function generate(egretProjectPath: string) {
 
 
 
-async function addToEgret(egretProjectRoot: string) {
-    console.log('正在将 protobuf 源码拷贝至 egret 项目...');
+async function add(egretProjectRoot: string) {
+    console.log('正在将 protobuf 源码拷贝至项目中...');
     await fs.copyAsync(path.join(root, 'dist'), path.join(egretProjectRoot, 'protobuf/library'));
     await fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/protofile'));
     await fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/bundles'));
-    console.log('正在将 protobuf 添加到 egretProperties.json 中...');
-    const egretProperties = await fs.readJSONAsync(path.join(egretProjectRoot, 'egretProperties.json'));
-    egretProperties.modules.push({ name: 'protobuf-library', path: 'protobuf/library' });
-    egretProperties.modules.push({ name: 'protobuf-bundles', path: 'protobuf/bundles' });
-    await fs.writeFileAsync(path.join(egretProjectRoot, 'egretProperties.json'), JSON.stringify(egretProperties, null, '\t\t'));
-    console.log('正在将 protobuf 添加到 tsconfig.json 中...');
-    const tsconfig = await fs.readJSONAsync(path.join(egretProjectRoot, 'tsconfig.json'));
-    tsconfig.include.push('protobuf/**/*.d.ts');
-    await fs.writeFileAsync(path.join(egretProjectRoot, 'tsconfig.json'), JSON.stringify(tsconfig, null, '\t\t'));
+
+    const egretPropertiesPath = path.join(egretProjectRoot, 'egretProperties.json');
+    if (await fs.existsAsync(egretPropertiesPath)) {
+        console.log('正在将 protobuf 添加到 egretProperties.json 中...');
+        const egretProperties = await fs.readJSONAsync(egretPropertiesPath);
+        egretProperties.modules.push({ name: 'protobuf-library', path: 'protobuf/library' });
+        egretProperties.modules.push({ name: 'protobuf-bundles', path: 'protobuf/bundles' });
+        await fs.writeFileAsync(path.join(egretProjectRoot, 'egretProperties.json'), JSON.stringify(egretProperties, null, '\t\t'));
+        console.log('正在将 protobuf 添加到 tsconfig.json 中...');
+        const tsconfig = await fs.readJSONAsync(path.join(egretProjectRoot, 'tsconfig.json'));
+        tsconfig.include.push('protobuf/**/*.d.ts');
+        await fs.writeFileAsync(path.join(egretProjectRoot, 'tsconfig.json'), JSON.stringify(tsconfig, null, '\t\t'));
+    }
+    else {
+        console.log('输入的文件夹不是白鹭引擎项目')
+    }
+
+
 }
 
 
@@ -74,10 +86,13 @@ export function run(command: string, egretProjectRoot: string) {
 async function run_1(command: string, egretProjectRoot: string) {
 
     if (command == "add") {
-        await addToEgret(egretProjectRoot);
+        await add(egretProjectRoot);
     }
     else if (command == "generate") {
         await generate(egretProjectRoot)
+    }
+    else {
+        console.error('请输入命令: add / generate')
     }
 
 }

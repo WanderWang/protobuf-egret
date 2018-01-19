@@ -51,70 +51,76 @@ function shell(command, args) {
             else {
                 resolve(stdout);
             }
-            // console.log(stdout, stderr)
         });
     });
 }
 function generate(egretProjectPath) {
     return __awaiter(this, void 0, void 0, function () {
-        var tempfile, output, dirname, protoRoot, fileList, protoList, pbjsResult, minjs, pbtsResult;
+        var rootDir, tempfile, output, dirname, protoRoot, fileList, protoList, pbjsResult, minjs, pbtsResult;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    rootDir = path.join(egretProjectPath, 'protobuf');
+                    return [4 /*yield*/, (fs.existsAsync(rootDir))];
+                case 1:
+                    if (!(_a.sent())) {
+                        console.error('当前目录不存在 protobuf 文件夹，请首先执行 pb-egret add 命令');
+                        process.exit(1);
+                    }
                     tempfile = path.join(os.tmpdir(), 'pbegret', 'temp.js');
                     return [4 /*yield*/, fs.mkdirpAsync(path.dirname(tempfile))];
-                case 1:
+                case 2:
                     _a.sent();
                     output = path.join(egretProjectPath, '/protobuf/bundles/protobuf-bundles.js');
                     dirname = path.dirname(output);
                     return [4 /*yield*/, fs.mkdirpAsync(dirname)];
-                case 2:
+                case 3:
                     _a.sent();
                     protoRoot = path.join(egretProjectPath, 'protobuf/protofile');
                     return [4 /*yield*/, fs.readdirAsync(protoRoot)];
-                case 3:
+                case 4:
                     fileList = _a.sent();
                     protoList = fileList.filter(function (item) { return path.extname(item) === '.proto'; });
                     return [4 /*yield*/, shell('pbjs', ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile])];
-                case 4:
+                case 5:
                     _a.sent();
                     return [4 /*yield*/, fs.readFileAsync(tempfile, 'utf-8')];
-                case 5:
+                case 6:
                     pbjsResult = _a.sent();
                     pbjsResult = 'var $protobuf = window.protobuf;\n$protobuf.roots.default=window;\n' + pbjsResult;
                     return [4 /*yield*/, fs.writeFileAsync(output, pbjsResult, 'utf-8')];
-                case 6:
+                case 7:
                     _a.sent();
                     minjs = UglifyJS.minify(pbjsResult);
                     return [4 /*yield*/, fs.writeFileAsync(output.replace('.js', '.min.js'), minjs.code, 'utf-8')];
-                case 7:
-                    _a.sent();
-                    return [4 /*yield*/, shell('pbts', ['--main', output, '-o', tempfile])];
                 case 8:
                     _a.sent();
-                    return [4 /*yield*/, fs.readFileAsync(tempfile, 'utf-8')];
+                    return [4 /*yield*/, shell('pbts', ['--main', output, '-o', tempfile])];
                 case 9:
+                    _a.sent();
+                    return [4 /*yield*/, fs.readFileAsync(tempfile, 'utf-8')];
+                case 10:
                     pbtsResult = _a.sent();
                     pbtsResult = pbtsResult.replace(/\$protobuf/gi, "protobuf").replace(/export namespace/gi, 'declare namespace');
                     pbtsResult = 'type Long = protobuf.Long;\n' + pbtsResult;
                     return [4 /*yield*/, fs.writeFileAsync(output.replace(".js", ".d.ts"), pbtsResult, 'utf-8')];
-                case 10:
+                case 11:
                     _a.sent();
                     return [4 /*yield*/, fs.removeAsync(tempfile)];
-                case 11:
+                case 12:
                     _a.sent();
                     return [2 /*return*/];
             }
         });
     });
 }
-function addToEgret(egretProjectRoot) {
+function add(egretProjectRoot) {
     return __awaiter(this, void 0, void 0, function () {
-        var egretProperties, tsconfig;
+        var egretPropertiesPath, egretProperties, tsconfig;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log('正在将 protobuf 源码拷贝至 egret 项目...');
+                    console.log('正在将 protobuf 源码拷贝至项目中...');
                     return [4 /*yield*/, fs.copyAsync(path.join(root, 'dist'), path.join(egretProjectRoot, 'protobuf/library'))];
                 case 1:
                     _a.sent();
@@ -124,24 +130,32 @@ function addToEgret(egretProjectRoot) {
                     return [4 /*yield*/, fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/bundles'))];
                 case 3:
                     _a.sent();
-                    console.log('正在将 protobuf 添加到 egretProperties.json 中...');
-                    return [4 /*yield*/, fs.readJSONAsync(path.join(egretProjectRoot, 'egretProperties.json'))];
+                    egretPropertiesPath = path.join(egretProjectRoot, 'egretProperties.json');
+                    return [4 /*yield*/, fs.existsAsync(egretPropertiesPath)];
                 case 4:
+                    if (!_a.sent()) return [3 /*break*/, 9];
+                    console.log('正在将 protobuf 添加到 egretProperties.json 中...');
+                    return [4 /*yield*/, fs.readJSONAsync(egretPropertiesPath)];
+                case 5:
                     egretProperties = _a.sent();
                     egretProperties.modules.push({ name: 'protobuf-library', path: 'protobuf/library' });
                     egretProperties.modules.push({ name: 'protobuf-bundles', path: 'protobuf/bundles' });
                     return [4 /*yield*/, fs.writeFileAsync(path.join(egretProjectRoot, 'egretProperties.json'), JSON.stringify(egretProperties, null, '\t\t'))];
-                case 5:
+                case 6:
                     _a.sent();
                     console.log('正在将 protobuf 添加到 tsconfig.json 中...');
                     return [4 /*yield*/, fs.readJSONAsync(path.join(egretProjectRoot, 'tsconfig.json'))];
-                case 6:
+                case 7:
                     tsconfig = _a.sent();
                     tsconfig.include.push('protobuf/**/*.d.ts');
                     return [4 /*yield*/, fs.writeFileAsync(path.join(egretProjectRoot, 'tsconfig.json'), JSON.stringify(tsconfig, null, '\t\t'))];
-                case 7:
+                case 8:
                     _a.sent();
-                    return [2 /*return*/];
+                    return [3 /*break*/, 10];
+                case 9:
+                    console.log('输入的文件夹不是白鹭引擎项目');
+                    _a.label = 10;
+                case 10: return [2 /*return*/];
             }
         });
     });
@@ -156,17 +170,20 @@ function run_1(command, egretProjectRoot) {
             switch (_a.label) {
                 case 0:
                     if (!(command == "add")) return [3 /*break*/, 2];
-                    return [4 /*yield*/, addToEgret(egretProjectRoot)];
+                    return [4 /*yield*/, add(egretProjectRoot)];
                 case 1:
                     _a.sent();
-                    return [3 /*break*/, 4];
+                    return [3 /*break*/, 5];
                 case 2:
                     if (!(command == "generate")) return [3 /*break*/, 4];
                     return [4 /*yield*/, generate(egretProjectRoot)];
                 case 3:
                     _a.sent();
-                    _a.label = 4;
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 4:
+                    console.error('请输入命令: add / generate');
+                    _a.label = 5;
+                case 5: return [2 /*return*/];
             }
         });
     });
