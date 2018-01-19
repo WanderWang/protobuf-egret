@@ -42,6 +42,7 @@ async function generate(egretProjectPath: string) {
     await shell('pbts', ['--main', output, '-o', tempfile]);
     let pbtsResult = await fs.readFileAsync(tempfile, 'utf-8');
     pbtsResult = pbtsResult.replace(/\$protobuf/gi, "protobuf").replace(/export namespace/gi, 'declare namespace');
+    pbtsResult = 'type Long = protobuf.Long;\n' + pbtsResult;
     await fs.writeFileAsync(output.replace(".js", ".d.ts"), pbtsResult, 'utf-8');
     await fs.removeAsync(tempfile);
 

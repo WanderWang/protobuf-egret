@@ -96,6 +96,7 @@ function generate(egretProjectPath) {
                 case 9:
                     pbtsResult = _a.sent();
                     pbtsResult = pbtsResult.replace(/\$protobuf/gi, "protobuf").replace(/export namespace/gi, 'declare namespace');
+                    pbtsResult = 'type Long = protobuf.Long;\n' + pbtsResult;
                     return [4 /*yield*/, fs.writeFileAsync(output.replace(".js", ".d.ts"), pbtsResult, 'utf-8')];
                 case 10:
                     _a.sent();
