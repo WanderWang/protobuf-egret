@@ -39,6 +39,16 @@ pb-egret generate
 ```
 
 
+## 更新日志
+
+
+### 1.1.1 
+
+添加 pbconfig.json
+
+### 1.0.7
+
+初始版本
 
 
 ## 如何运行 Demo
@@ -52,6 +62,7 @@ proto 文件中的每一个协议一定要从属于一个 package，否则.d.ts�
 
 ## 路线图
 
+* 使用 profobuf 配置文件
 * 集成 egret 构建管线
 
 

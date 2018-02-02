@@ -22,23 +22,79 @@ function shell(command: string, args: string[]) {
 }
 
 
-async function generate(egretProjectPath: string) {
-    const rootDir = path.join(egretProjectPath, 'protobuf');
-    if (!await (fs.existsAsync(rootDir))) {
-        console.error('当前目录不存在 protobuf 文件夹，请首先执行 pb-egret add 命令');
-        process.exit(1);
+type ProtobufConfig = {
+
+    options: {
+        "no-create": boolean,
+        "no-verify": boolean,
+        "no-convert": boolean
+    },
+
+    sourceRoot: string,
+    outputFile: string
+
+
+}
+
+const pbconfigContent = JSON.stringify({
+    options: {
+        "no-create": false,
+        "no-verify": false,
+        "no-convert": true
+    },
+    sourceRoot: "protofile",
+    outputFile: "bundles/protobuf-bundles.js"
+} as ProtobufConfig, null, '\t');
+
+async function generate(rootDir: string) {
+
+    const pbconfigPath = path.join(rootDir, 'pbconfig.json');
+    if (!(await fs.existsAsync(pbconfigPath))) {
+        if (await fs.existsAsync(path.join(rootDir, 'protobuf'))) {
+            const pbconfigPath = path.join(rootDir, 'protobuf', 'pbconfig.json')
+            if (!await (fs.existsAsync(pbconfigPath))) {
+                await fs.writeFileAsync(pbconfigPath, pbconfigContent, 'utf-8');
+            }
+            await generate(path.join(rootDir, 'protobuf'));
+        }
+        else {
+            throw '请首先执行 pb-egret add 命令'
+        }
+        return;
     }
+    const pbconfig: ProtobufConfig = await fs.readJSONAsync(path.join(rootDir, 'pbconfig.json'));
     const tempfile = path.join(os.tmpdir(), 'pbegret', 'temp.js');
     await fs.mkdirpAsync(path.dirname(tempfile));
-    const output = path.join(egretProjectPath, '/protobuf/bundles/protobuf-bundles.js');
+    const output = path.join(rootDir, pbconfig.outputFile);
     const dirname = path.dirname(output);
     await fs.mkdirpAsync(dirname);
-    const protoRoot = path.join(egretProjectPath, 'protobuf/protofile');
+    const protoRoot = path.join(rootDir, pbconfig.sourceRoot);
     const fileList = await fs.readdirAsync(protoRoot);
     const protoList = fileList.filter(item => path.extname(item) === '.proto')
-    await shell('pbjs', ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile]);
+    if (protoList.length == 0) {
+        throw ' protofile 文件夹中不存在 .proto 文件'
+    }
+    await Promise.all(protoList.map(async (protofile) => {
+        const content = await fs.readFileAsync(path.join(protoRoot, protofile), 'utf-8')
+        if (content.indexOf('package') == -1) {
+            throw `${protofile} 中必须包含 package 字段`
+        }
+    }))
+
+
+
+
+    const args = ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile]
+    if (pbconfig.options['no-create']) {
+        args.unshift('--no-create');
+    }
+    if (pbconfig.options['no-verify']) {
+        args.unshift('--no-verify');
+    }
+    await shell('pbjs', args);
     let pbjsResult = await fs.readFileAsync(tempfile, 'utf-8');
     pbjsResult = 'var $protobuf = window.protobuf;\n$protobuf.roots.default=window;\n' + pbjsResult;
+    console.log(output)
     await fs.writeFileAsync(output, pbjsResult, 'utf-8');
     const minjs = UglifyJS.minify(pbjsResult);
     await fs.writeFileAsync(output.replace('.js', '.min.js'), minjs.code, 'utf-8');
@@ -58,6 +114,7 @@ async function add(egretProjectRoot: string) {
     await fs.copyAsync(path.join(root, 'dist'), path.join(egretProjectRoot, 'protobuf/library'));
     await fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/protofile'));
     await fs.mkdirpSync(path.join(egretProjectRoot, 'protobuf/bundles'));
+    await fs.writeFileAsync((path.join(egretProjectRoot, 'protobuf/pbconfig.json')), pbconfigContent, 'utf-8');
 
     const egretPropertiesPath = path.join(egretProjectRoot, 'egretProperties.json');
     if (await fs.existsAsync(egretPropertiesPath)) {
