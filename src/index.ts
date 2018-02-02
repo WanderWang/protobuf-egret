@@ -94,7 +94,6 @@ async function generate(rootDir: string) {
     await shell('pbjs', args);
     let pbjsResult = await fs.readFileAsync(tempfile, 'utf-8');
     pbjsResult = 'var $protobuf = window.protobuf;\n$protobuf.roots.default=window;\n' + pbjsResult;
-    console.log(output)
     await fs.writeFileAsync(output, pbjsResult, 'utf-8');
     const minjs = UglifyJS.minify(pbjsResult);
     await fs.writeFileAsync(output.replace('.js', '.min.js'), minjs.code, 'utf-8');

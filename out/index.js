@@ -141,7 +141,6 @@ function generate(rootDir) {
                 case 16:
                     pbjsResult = _a.sent();
                     pbjsResult = 'var $protobuf = window.protobuf;\n$protobuf.roots.default=window;\n' + pbjsResult;
-                    console.log(output);
                     return [4 /*yield*/, fs.writeFileAsync(output, pbjsResult, 'utf-8')];
                 case 17:
                     _a.sent();
