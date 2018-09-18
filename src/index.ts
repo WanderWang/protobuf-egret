@@ -84,7 +84,7 @@ async function generate(rootDir: string) {
 
 
 
-    const args = ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile]
+    const args = ['-t', 'static', '--keep-case', '-p', protoRoot, protoList.join(" "), '-o', tempfile]
     if (pbconfig.options['no-create']) {
         args.unshift('--no-create');
     }

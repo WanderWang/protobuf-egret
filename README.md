@@ -41,6 +41,10 @@ pb-egret generate
 
 ## 更新日志
 
+### 1.2.0
+
+添加 keepCase 支持
+
 
 ### 1.1.1 
 

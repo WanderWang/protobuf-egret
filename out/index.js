@@ -65,8 +65,8 @@ var pbconfigContent = JSON.stringify({
 }, null, '\t');
 function generate(rootDir) {
     return __awaiter(this, void 0, void 0, function () {
-        var _this = this;
         var pbconfigPath, pbconfigPath_1, pbconfig, tempfile, output, dirname, protoRoot, fileList, protoList, args, pbjsResult, minjs, pbtsResult;
+        var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -127,7 +127,7 @@ function generate(rootDir) {
                         }); }))];
                 case 14:
                     _a.sent();
-                    args = ['-t', 'static', '-p', protoRoot, protoList.join(" "), '-o', tempfile];
+                    args = ['-t', 'static', '--keep-case', '-p', protoRoot, protoList.join(" "), '-o', tempfile];
                     if (pbconfig.options['no-create']) {
                         args.unshift('--no-create');
                     }
