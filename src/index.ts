@@ -27,7 +27,8 @@ type ProtobufConfig = {
     options: {
         "no-create": boolean,
         "no-verify": boolean,
-        "no-convert": boolean
+        "no-convert": boolean,
+        "no-delimited": boolean
     },
 
     sourceRoot: string,
@@ -40,7 +41,8 @@ const pbconfigContent = JSON.stringify({
     options: {
         "no-create": false,
         "no-verify": false,
-        "no-convert": true
+        "no-convert": true,
+        "no-delimited": false
     },
     sourceRoot: "protofile",
     outputFile: "bundles/protobuf-bundles.js"
@@ -90,6 +92,12 @@ async function generate(rootDir: string) {
     }
     if (pbconfig.options['no-verify']) {
         args.unshift('--no-verify');
+    }
+    if (pbconfig.options['no-convert']) {
+        args.unshift('--no-convert')
+    }
+    if (pbconfig.options["no-delimited"]) {
+        args.unshift("--no-delimited")
     }
     await shell('pbjs', args);
     let pbjsResult = await fs.readFileAsync(tempfile, 'utf-8');

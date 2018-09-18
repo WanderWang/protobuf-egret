@@ -58,7 +58,8 @@ var pbconfigContent = JSON.stringify({
     options: {
         "no-create": false,
         "no-verify": false,
-        "no-convert": true
+        "no-convert": true,
+        "no-delimited": false
     },
     sourceRoot: "protofile",
     outputFile: "bundles/protobuf-bundles.js"
@@ -133,6 +134,12 @@ function generate(rootDir) {
                     }
                     if (pbconfig.options['no-verify']) {
                         args.unshift('--no-verify');
+                    }
+                    if (pbconfig.options['no-convert']) {
+                        args.unshift('--no-convert');
+                    }
+                    if (pbconfig.options["no-delimited"]) {
+                        args.unshift("--no-delimited");
                     }
                     return [4 /*yield*/, shell('pbjs', args)];
                 case 15:
